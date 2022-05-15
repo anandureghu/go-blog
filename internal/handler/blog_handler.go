@@ -19,6 +19,8 @@ var (
 
 func GetAllBlogs(w http.ResponseWriter, req *http.Request) {
 	blogs := br.GetAllBlogs()
+	a := len(blogs)
+	fmt.Println(a)
 	json.NewEncoder(w).Encode(blogs)
 }
 
@@ -63,13 +65,6 @@ func UpdateBlog(w http.ResponseWriter, req *http.Request) {
 }
 
 func DeleteBlog(w http.ResponseWriter, req *http.Request) {
-
-	log.Println("---------------------DELETE----------------------")
-	w.Header().Set("Access-Control-Request-Method", "DELETE")
-	// w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-	// req.Header.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-	// w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-
 	param := mux.Vars(req)["id"]
 	id, err := strconv.Atoi(param)
 	if err != nil {

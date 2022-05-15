@@ -44,8 +44,7 @@ func TestConnection(conn *sql.DB) error {
 	log.Println("Testing connection")
 	err := conn.Ping()
 	if err != nil {
-		fmt.Println(err)
-		return err
+		log.Fatal(err)
 	}
 
 	return nil

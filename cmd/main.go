@@ -7,7 +7,6 @@ import (
 
 	"github.com/anandureghu/go-blog/internal/middleware"
 	"github.com/anandureghu/go-blog/internal/router"
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
@@ -34,11 +33,12 @@ func main() {
 	r.Use(middleware.HeaderMiddleware)
 
 	// Where ORIGIN_ALLOWED is like `scheme://dns[:port]`, or `*` (insecure)
-	headersOk := handlers.AllowedHeaders([]string{"Access-Control-Allow-Origin", "Accept", "Accept-Language", "Content-Type", "Content-Language", "Origin"})
-	originsOk := handlers.AllowedOrigins([]string{"http://localhost:*", "*"})
-	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	// headersOk := handlers.AllowedHeaders([]string{"Access-Control-Allow-Origin", "Accept", "Accept-Language", "Content-Type", "Content-Language", "Origin"})
+	// originsOk := handlers.AllowedOrigins([]string{"http://localhost:*", "*"})
+	// methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 
 	log.Printf("Server started listening on %v%v/\n", URL, PORT)
-	log.Fatal(http.ListenAndServe(PORT, handlers.CORS(originsOk, headersOk, methodsOk)(r)))
+	// log.Fatal(http.ListenAndServe(PORT, handlers.CORS(originsOk, headersOk, methodsOk)(r)))
+	log.Fatal(http.ListenAndServe(PORT, r))
 	// defer repository.GetConnection().Close()
 }
