@@ -9,6 +9,7 @@ import (
 
 	"github.com/anandureghu/go-blog/internal/model"
 	"github.com/joho/godotenv"
+	"github.com/manveru/faker"
 )
 
 func init() {
@@ -98,17 +99,21 @@ func (b *BlogRepository) GetBlog(id int) (model.Blog, error) {
 }
 
 func (b *BlogRepository) CreateBlog(blog model.Blog) error {
+
+	fake, _ := faker.New("en")
+
 	create_blog := `
 	INSERT INTO blogs
 	(title, description, cover, name, avatar, created_at, updated_at)
 	VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`
+
 	_, err := b.Db.Exec(create_blog,
 		blog.Title,
 		blog.Description,
 		blog.Cover,
-		blog.Name,
-		blog.Avatar,
+		fake.Name(),
+		fake.URL(),
 		time.Now(),
 		time.Now(),
 	)

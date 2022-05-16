@@ -24,7 +24,7 @@ func GetAllBlogs(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		http.Error(w, "internal server error", 500)
 	}
-	err = json.NewEncoder(w).Encode(blogs)
+	json.NewEncoder(w).Encode(blogs)
 	w.WriteHeader(200)
 }
 
