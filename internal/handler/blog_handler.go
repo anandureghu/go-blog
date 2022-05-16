@@ -25,8 +25,7 @@ func GetAllBlogs(w http.ResponseWriter, req *http.Request) {
 }
 
 func GetBlog(w http.ResponseWriter, req *http.Request) {
-	param := mux.Vars(req)["id"]
-	id, err := strconv.Atoi(param)
+	id, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
 		w.WriteHeader(405)
 		fmt.Fprintf(w, "invalid id")
@@ -62,11 +61,23 @@ func CreateBlog(w http.ResponseWriter, req *http.Request) {
 
 func UpdateBlog(w http.ResponseWriter, req *http.Request) {
 
+	id, _ := strconv.Atoi(mux.Vars(req)["id"])
+
+	blog := model.Blog{}
+	err := json.NewDecoder(req.Body).Decode(&blog)
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprintf(w, "internal server error")
+		log.Println("Cannot unmarshal json")
+	}
+	ub := br.UpdateBlog(id, blog)
+
+	err = json.NewEncoder(w).Encode(ub)
+	w.WriteHeader(200)
 }
 
 func DeleteBlog(w http.ResponseWriter, req *http.Request) {
-	param := mux.Vars(req)["id"]
-	id, err := strconv.Atoi(param)
+	id, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
 		w.WriteHeader(405)
 		fmt.Fprintf(w, "invalid id")
