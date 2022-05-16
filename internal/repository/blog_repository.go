@@ -37,14 +37,15 @@ func NewBlogRepository() *BlogRepository {
 	}
 }
 
-func (b *BlogRepository) GetAllBlogs() []model.Blog {
+func (b *BlogRepository) GetAllBlogs() ([]model.Blog, error) {
 	rows, err := b.Db.Query(`
 	SELECT
 	id, title, description, cover, name, avatar, created_at, updated_at
 	FROM blogs
 	`)
 	if err != nil {
-		log.Fatalln("can't get all blogs")
+		log.Println("can't get all blogs")
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -64,13 +65,14 @@ func (b *BlogRepository) GetAllBlogs() []model.Blog {
 		)
 
 		if err != nil {
-			log.Println("can't iterate over blogs")
+			log.Println("can't scan blogs")
+			return nil, err
 		}
 
 		blogs = append(blogs, blog)
 	}
 
-	return blogs
+	return blogs, rows.Err()
 }
 
 func (b *BlogRepository) GetBlog(id int) (model.Blog, error) {
@@ -95,7 +97,7 @@ func (b *BlogRepository) GetBlog(id int) (model.Blog, error) {
 	return blog, row.Err()
 }
 
-func (b *BlogRepository) CreateBlog(blog model.Blog) {
+func (b *BlogRepository) CreateBlog(blog model.Blog) error {
 	create_blog := `
 	INSERT INTO blogs
 	(title, description, cover, name, avatar, created_at, updated_at)
@@ -112,16 +114,24 @@ func (b *BlogRepository) CreateBlog(blog model.Blog) {
 	)
 
 	if err != nil {
-		log.Println("Cannot create blog", err)
+		log.Println("cannot create blog", err)
+		return err
 	}
+
+	return nil
 }
 
-func (b *BlogRepository) UpdateBlog(id int, blog model.Blog) model.Blog {
+func (b *BlogRepository) UpdateBlog(id int, blog model.Blog) (model.Blog, error) {
 	// Checking if blog is in databse
-	ub, _ := b.GetBlog(id)
+	ub, err := b.GetBlog(id)
+
 	if ub.Id == 0 {
 		// Throe not found
 		log.Println("No blog with id", id)
+		return model.Blog{}, fmt.Errorf("blog with id %v not found", id)
+	}
+	if err != nil {
+		return model.Blog{}, err
 	}
 	blog.Id = id
 
@@ -135,7 +145,7 @@ func (b *BlogRepository) UpdateBlog(id int, blog model.Blog) model.Blog {
 		updated_at=$6
 		WHERE id=$7
 	`
-	b.Db.Exec(update_blog,
+	_, err = b.Db.Exec(update_blog,
 		blog.Title,
 		blog.Description,
 		blog.Cover,
@@ -145,15 +155,28 @@ func (b *BlogRepository) UpdateBlog(id int, blog model.Blog) model.Blog {
 		blog.Id,
 	)
 
-	blog, _ = b.GetBlog(id)
-
-	return blog
+	return blog, err
 }
 
-func (b *BlogRepository) DeleteBlog(id int) {
+func (b *BlogRepository) DeleteBlog(id int) error {
+
+	// Checking if blog is in databse
+	ub, err := b.GetBlog(id)
+
+	if err != nil {
+		return err
+	}
+	if ub.Id == 0 {
+		// Throe not found
+		log.Println("No blog with id", id)
+		return fmt.Errorf("blog with id %v not found", id)
+	}
+
 	delete_blog := `
 		DELETE FROM blogs
 		WHERE id=$1
 	`
-	b.Db.Exec(delete_blog, id)
+	_, err = b.Db.Exec(delete_blog, id)
+
+	return err
 }
