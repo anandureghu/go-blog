@@ -117,6 +117,36 @@ func (b *BlogRepository) CreateBlog(blog model.Blog) {
 }
 
 func (b *BlogRepository) UpdateBlog(id int, blog model.Blog) model.Blog {
+	// Checking if blog is in databse
+	ub, _ := b.GetBlog(id)
+	if ub.Id == 0 {
+		// Throe not found
+		log.Println("No blog with id", id)
+	}
+	blog.Id = id
+
+	update_blog := `
+		UPDATE blogs set
+		title=$1,
+		description=$2, 
+		cover=$3,
+		name=$4,
+		avatar=$5,
+		updated_at=$6
+		WHERE id=$7
+	`
+	b.Db.Exec(update_blog,
+		blog.Title,
+		blog.Description,
+		blog.Cover,
+		blog.Name,
+		blog.Avatar,
+		time.Now(),
+		blog.Id,
+	)
+
+	blog, _ = b.GetBlog(id)
+
 	return blog
 }
 
